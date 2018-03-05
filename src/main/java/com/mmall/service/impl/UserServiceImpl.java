@@ -9,6 +9,7 @@ import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.ast.OpPlus;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -155,6 +156,15 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createBySuccess("更新个人信息成功", updateUser);
         }
         return ServerResponse.createByErrorMessage("更新个人信息失败");
+    }
+
+    public ServerResponse<User> getInformation(Integer userId) {
+        User userInfo = userMapper.selectByPrimaryKey(userId);
+        if (userInfo == null) {
+            return ServerResponse.createByErrorMessage("找不到当前用户");
+        }
+        userInfo.setPassword(StringUtils.EMPTY);
+        return ServerResponse.createBySuccess(userInfo);
     }
 
 }
