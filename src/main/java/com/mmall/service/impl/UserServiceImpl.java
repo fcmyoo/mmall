@@ -59,7 +59,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     public ServerResponse<String> checkValid(String str, String type) {
-        if (org.apache.commons.lang3.StringUtils.isNotBlank(type)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(type)) {
             //开始效验
             if (Const.USERNAME.equals(type)) {
                 int resultCount = userMapper.checkUserName(str);
@@ -85,7 +85,7 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
         String question = userMapper.selectQuestionByUserName(username);
-        if (StringUtils.isNotBlank(question)) {
+        if (StringUtils.isBlank(question)) {
             return ServerResponse.createBySuccess(question);
         }
         return ServerResponse.createByErrorMessage("您的密码找回问题不存在");
@@ -103,7 +103,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     public ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken) {
-        if (StringUtils.isNotBlank(forgetToken)) {
+        if (StringUtils.isBlank(forgetToken)) {
             return ServerResponse.createByErrorMessage("参数错误,token需要传递");
         }
         ServerResponse validResponse = this.checkValid(username, Const.USERNAME);
@@ -111,7 +111,7 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
         String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
-        if (StringUtils.isNotBlank(token)) {
+        if (StringUtils.isBlank(token)) {
             return ServerResponse.createByErrorMessage("token无效或者过期");
         }
         if (StringUtils.equals(forgetToken, token)) {
@@ -120,7 +120,6 @@ public class UserServiceImpl implements IUserService {
             if (rowCount > 0) {
                 return ServerResponse.createBySuccessMessage("修改密码成功");
             }
-
         } else {
             return ServerResponse.createByErrorMessage("token错误,请重新获取重置密码的Token");
         }
@@ -165,6 +164,20 @@ public class UserServiceImpl implements IUserService {
         }
         userInfo.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess(userInfo);
+    }
+
+    //backend
+
+    /**
+     * 效验是否是管理员
+     * @param user
+     * @return
+     */
+    public ServerResponse checkAdminRole(User user) {
+        if (user != null && user.getRole() == Const.Role.ROLE_ADMIN) {
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
     }
 
 }
